@@ -4,6 +4,12 @@ import math
 
 class BloomFilter:
     def __init__(self, expected_items, false_positive_rate):
+        if expected_items <= 0:
+            raise ValueError("expected_items must be positive")
+
+        if false_positive_rate <= 0 or false_positive_rate >= 1:
+            raise ValueError("false_positive_rate must be between 0 and 1")
+
         self.expected_items = expected_items
         self.false_positive_rate = false_positive_rate
 
@@ -55,3 +61,18 @@ class BloomFilter:
 
         # if all positions are 1, the item is probably there
         return True
+
+    def fill_ratio(self):
+        # tells us how full the bit array is
+        return sum(self.bit_array) / self.size
+
+    def estimated_false_positive_rate(self):
+        k = self.number_of_hashes
+        n = self.items_added
+        m = self.size
+
+        return (1 - math.exp((-k * n) / m)) ** k
+
+    def memory_usage_bytes(self):
+        # bit array size is in bits, so divide by 8 for bytes
+        return self.size / 8
