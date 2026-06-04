@@ -1,6 +1,7 @@
 import hashlib
 import math
 
+
 class BloomFilter:
     def __init__(self, expected_items, false_positive_rate):
         self.expected_items = expected_items
@@ -34,3 +35,23 @@ class BloomFilter:
             positions.append(position)
 
         return positions
+
+    def add(self, item):
+        positions = self.get_hash_positions(item)
+
+        # set all hash positions to 1
+        for position in positions:
+            self.bit_array[position] = 1
+
+        self.items_added += 1
+
+    def contains(self, item):
+        positions = self.get_hash_positions(item)
+
+        # if one position is still 0, the item was not added
+        for position in positions:
+            if self.bit_array[position] == 0:
+                return False
+
+        # if all positions are 1, the item is probably there
+        return True
