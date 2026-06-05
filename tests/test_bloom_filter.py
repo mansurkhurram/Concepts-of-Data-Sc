@@ -40,7 +40,27 @@ def test_bit_array_changes():
 
     assert after > before
 
-# ratio test
+def test_fill_ratio():
+    bf = BloomFilter(1000, 0.01)
 
-# invalid input test
+    bf.add("apple")
+    bf.add("banana")
+
+    ratio = bf.fill_ratio()
+
+    assert ratio > 0
+    assert ratio < 1
+
+def test_wrong_inputs():
+    try:
+        BloomFilter(0, 0.01)
+        assert False
+    except ValueError:
+        assert True
+
+    try:
+        BloomFilter(1000, 2)
+        assert False
+    except ValueError:
+        assert True
 
