@@ -1,7 +1,6 @@
 import hashlib
 import math
 
-
 class BloomFilter:
     def __init__(self, expected_items, false_positive_rate):
         if expected_items <= 0:
