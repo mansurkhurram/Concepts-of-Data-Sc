@@ -36,3 +36,14 @@ python -m pytest
 
 This command runs all tests inside the `tests/` folder.
 
+## Hash Function Tests
+
+The Bloom filter uses SHA-256 to create hash positions. Different numbers are added to the item before hashing, so one item can give several hash positions.
+
+The hash function tests check that:
+
+- the positions are inside the bit array
+- the same item gives the same positions every time
+- different items usually do not give the exact same positions
+- the hash function works for normal words and DNA-like strings
+
