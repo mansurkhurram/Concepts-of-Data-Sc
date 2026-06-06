@@ -6,35 +6,35 @@ def test_added_words_are_found():
     words = ["apple", "banana", "orange", "mango"]
 
     for word in words:
-        bf.add(word)
+        bf.insert(word)
 
     for word in words:
-        assert bf.contains(word) == True
+        assert bf.search(word) == True
 
 def test_word_not_added():
     bf = BloomFilter(1000, 0.01)
 
-    bf.add("apple")
-    bf.add("banana")
+    bf.insert("apple")
+    bf.insert("banana")
 
     # this word was not added, so it should normally be false
-    assert bf.contains("car") == False
+    assert bf.search("car") == False
 
 def test_counter_works():
     bf = BloomFilter(1000, 0.01)
 
-    bf.add("apple")
-    bf.add("banana")
-    bf.add("orange")
+    bf.insert("apple")
+    bf.insert("banana")
+    bf.insert("orange")
 
-    assert bf.items_added == 3
+    assert bf.count == 3
 
 def test_bit_array_changes():
     bf = BloomFilter(1000, 0.01)
 
     before = sum(bf.bit_array)
 
-    bf.add("apple")
+    bf.insert("apple")
 
     after = sum(bf.bit_array)
 
@@ -43,8 +43,8 @@ def test_bit_array_changes():
 def test_fill_ratio():
     bf = BloomFilter(1000, 0.01)
 
-    bf.add("apple")
-    bf.add("banana")
+    bf.insert("apple")
+    bf.insert("banana")
 
     ratio = bf.fill_ratio()
 

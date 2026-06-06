@@ -1,4 +1,5 @@
-import hashlib
+import mmh3
+from bitarray import bitarray
 import math
 
 class BloomFilter:
@@ -25,32 +26,27 @@ class BloomFilter:
         # start with all bits set to 0
         self.bit_array = [0] * self.size
 
-        self.items_added = 0
+        self.count = 0
 
     def get_hash_positions(self, item):
-        positions = []
+        if not isinstance(item, (str, bytes)):
+            item = str(item)
+            
+        h1 = mmh3.hash(item, seed=0, signed=False)
+        h2 = mmh3.hash(item, seed=1, signed=False)
+        
+        return [(h1 + i * h2) % self.size for i in range(self.number_of_hashes)]
 
-        # same item, but slightly changed each time using i
-        # this gives us different hash positions
-        for i in range(self.number_of_hashes):
-            text = str(item) + str(i)
-            hash_result = hashlib.sha256(text.encode()).hexdigest()
-            position = int(hash_result, 16) % self.size
-
-            positions.append(position)
-
-        return positions
-
-    def add(self, item):
+    def insert(self, item):
         positions = self.get_hash_positions(item)
 
         # set all hash positions to 1
         for position in positions:
             self.bit_array[position] = 1
 
-        self.items_added += 1
+        self.count += 1
 
-    def contains(self, item):
+    def search(self, item):
         positions = self.get_hash_positions(item)
 
         # if one position is still 0, the item was not added
@@ -65,9 +61,10 @@ class BloomFilter:
         # tells us how full the bit array is
         return sum(self.bit_array) / self.size
 
-    def estimated_false_positive_rate(self):
+    @property
+    def current_fp_rate(self):
         k = self.number_of_hashes
-        n = self.items_added
+        n = self.count
         m = self.size
 
         return (1 - math.exp((-k * n) / m)) ** k
@@ -75,3 +72,9 @@ class BloomFilter:
     def memory_usage_bytes(self):
         # bit array size is in bits, so divide by 8 for bytes
         return self.size / 8
+    
+    @property
+    def compression_ratio(self):
+        if self.count == 0:
+            return 0.0
+        return (self.size / 8) / (self.count * 6)
