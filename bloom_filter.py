@@ -78,3 +78,8 @@ class BloomFilter:
         if self.count == 0:
             return 0.0
         return (self.size / 8) / (self.count * 6)
+    
+    def __repr__(self):
+        return (f"BloomFilter(size={self.size}, "
+                f"number_of_hashes={self.number_of_hashes}, "
+                f"inserted={self.count}/{self.expected_items})")
