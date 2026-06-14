@@ -15,7 +15,7 @@ This is our implementation of a Bloom filter in Python for the Concepts of Data 
 - `tests/test_bloom_filter.py` — correctness tests
 - `tests/test_hash_functions.py` — hash function tests
 - `analysis.ipynb` — notebook with demo, complexity discussion, and analysis
-- `benchmark.py` — times insert and search for increasing dataset sizes
+- `benchmark.py` — times insert and search for increasing dataset sizes, to be run on HPC
 - `script.sh` — job script used to run the benchmark on VSC
 - `benchmark_results.txt` — output from the HPC benchmark run
 - `benchmark_plot.png` — plot of insert and search times
@@ -38,12 +38,33 @@ python -m pytest
 
 ## Benchmarks
 
-The benchmarks were run on the VSC HPC cluster (Vlaams Supercomputer Centrum). We timed insert and search for dataset sizes ranging from 1,000 to 1,000,000 elements. The results are in `benchmark_results.txt` and `benchmark_plot.png`.
+The benchmarks were run on the VSC HPC cluster (Vlaams Supercomputer Centrum). We timed insert and search for dataset sizes ranging from 1,000 to 1,000,000 elements.
 
-To rerun on VSC:
+To reproduce the results on VSC:
 ```bash
+# 1. connect to VSC
+ssh <your_vsc_id>@login.hpc.ugent.be
+ 
+# 2. upload files from your local machine (not from SSH)
+scp bloom_filter.py benchmark.py script.sh <your_vsc_id>@login.hpc.ugent.be:~/
+ 
+# 3. set up the environment on VSC
+conda create -n bloom python=3.10 -y
+conda activate bloom
+pip install mmh3 bitarray matplotlib
+ 
+# 4. submit the job
 qsub script.sh
+ 
+# 5. check job status
+qstat
+ 
+# 6. download results back to your local machine
+scp <your_vsc_id>@login.hpc.ugent.be:~/benchmark_results.txt .
+scp <your_vsc_id>@login.hpc.ugent.be:~/benchmark_plot.png .
 ```
+ 
+The results are already included in this repository in `benchmark_results.txt` and `benchmark_plot.png`.
 
 ## Conclusions
 
