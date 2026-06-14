@@ -42,3 +42,21 @@ def test_hashes_for_words_and_dna():
 
         for position in positions:
             assert 0 <= position < bf.size
+
+def test_hash_distribution():
+    bf = BloomFilter(1000, 0.01)
+
+    words = ["apple", "banana", "orange", "mango", "pear",
+             "grape", "kiwi", "melon", "peach", "plum"]
+    dna_sequences = ["ATCG", "GATTACA", "CCGTTA", "TTGGCA", "AACCGG",
+                     "GCATGC", "TTAGCC", "AGTCAG", "CCTAGA", "GGTTAA"]
+
+    for data in [words, dna_sequences]:
+        all_positions = []
+        for item in data:
+            all_positions.extend(bf.get_hash_positions(item))
+
+        # check that positions are spread across the bit array
+        # not all clustered in one spot
+        unique_positions = len(set(all_positions))
+        assert unique_positions > len(all_positions) * 0.5
