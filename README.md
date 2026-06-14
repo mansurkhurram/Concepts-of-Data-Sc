@@ -5,45 +5,54 @@
 - Mansoor Khurram
 - Muhammad Ismail
 
-## Project Description
+## What is this?
 
-The goal of this project is to implement a Bloom filter in Python. A Bloom filter is a probabilistic data structure for checking set membership. It can tell you whether an item is definitely not in a set, or possibly in it.
+This is our implementation of a Bloom filter in Python for the Concepts of Data Science course. A Bloom filter is a probabilistic data structure that lets you check if something is in a set without actually storing the elements. It uses way less memory than a regular set, the trade-off being that it can sometimes say an item is in the set when it isn't (false positive). It will never say something isn't there when it actually is though (no false negatives).
 
-The trade-off is false positives: occasionally an item that was never added will appear to be present. But it won't produce false negatives which means if you added something, the filter will always recognize it.
+## Files
 
-## Repository Structure
+- `bloom_filter.py` — the Bloom filter class
+- `tests/test_bloom_filter.py` — correctness tests
+- `tests/test_hash_functions.py` — hash function tests
+- `analysis.ipynb` — notebook with demo, complexity discussion, and analysis
+- `benchmark.py` — times insert and search for increasing dataset sizes
+- `script.sh` — job script used to run the benchmark on VSC
+- `benchmark_results.txt` — output from the HPC benchmark run
+- `benchmark_plot.png` — plot of insert and search times
+- `fp_rate_plot.png` — false positive rate vs number of inserted elements
+- `compression_ratio_plot.png` — compression ratio vs capacity and fp rate
+- `environment.yml` — conda environment to reproduce our setup
 
-```text
-.
-├── bloom_filter.py
-├── tests/
-│   └── test_bloom_filter.py
-├── README.md
-└── .gitignore
+## Setup
+
+```bash
+conda env create -f environment.yml
+conda activate bloom
 ```
 
-## Running the Tests
-
-The tests are written using `pytest`.
-
-To run the tests, first make sure you are in the main project folder:
-
-Then run:
+## Running the tests
 
 ```bash
 python -m pytest
 ```
 
-This command runs all tests inside the `tests/` folder.
+## Benchmarks
 
-## Hash Function Tests
+The benchmarks were run on the VSC HPC cluster (Vlaams Supercomputer Centrum). We timed insert and search for dataset sizes ranging from 1,000 to 1,000,000 elements. The results are in `benchmark_results.txt` and `benchmark_plot.png`.
 
-The Bloom filter uses SHA-256 to create hash positions. Different numbers are added to the item before hashing, so one item can give several hash positions.
+To rerun on VSC:
+```bash
+qsub script.sh
+```
 
-The hash function tests check that:
+## Conclusions
 
-- the positions are inside the bit array
-- the same item gives the same positions every time
-- different items usually do not give the exact same positions
-- the hash function works for normal words and DNA-like strings
+**Hash functions** — we used MurmurHash3 with double hashing which gives good distribution for both natural language words and DNA strings. The positions spread well across the bit array for both data types.
 
+**Time complexity** — insert and search both run in O(k) time where k is the number of hash functions. Since k is fixed when you create the filter, both operations are basically O(1) per element. The benchmark results confirm this — both insert and search scale linearly with n, and the times are nearly identical to each other at every size (e.g. at 1 million elements, insert took 2.11s and search took 2.13s). This makes sense since both operations do the exact same thing — compute k hash positions and read or write the bits.
+
+**Space complexity** — O(n) space. The filter only stores bits, not the actual elements, so it's much more memory efficient than a regular set or list.
+
+**False positive rate** — the filter stayed well below the 1% target while under capacity. Once we went past 1000 elements it crossed the target line and kept climbing, reaching around 16% at 2000 elements (2x capacity). The measured rate follows the theoretical curve closely which means our implementation matches what the math predicts.
+
+**Compression ratio** — all four false positive rates we tested (0.1%, 1%, 5%, 10%) gave compression ratios well below 1.0, meaning the filter always uses less memory than storing the raw strings. The ratio stays flat across all capacities which makes sense since both the filter size and the raw data size scale linearly with n. A stricter false positive rate (0.1%) gave a ratio of around 0.30, while a looser one (10%) gave around 0.09 — so the less accurate you're willing to be, the more memory you save.
