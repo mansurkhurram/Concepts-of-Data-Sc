@@ -1,0 +1,7 @@
+n=1000: insert=0.0016s  search=0.0015s
+n=5000: insert=0.0078s  search=0.0077s
+n=10000: insert=0.0157s  search=0.0156s
+n=50000: insert=0.0790s  search=0.0787s
+n=100000: insert=0.1581s  search=0.1560s
+n=500000: insert=0.9970s  search=0.9967s
+n=1000000: insert=2.1149s  search=2.1337s
